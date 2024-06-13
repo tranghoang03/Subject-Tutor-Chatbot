@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca:wght@100..900&display=swap" rel="stylesheet">
+    <title>Document</title>
+    <script>
+        (function(){
+            window.addEventListener('load', init)
+            function init(){
+                const sending = document.getElementById('submit')
+                sending.addEventListener('click', send)
+            }
+            async function send(event){
+                event.preventDefault()
+                const user_query = document.getElementById('input_text').value
+                document.getElementById('input_text').value = ""
+                const userimg = "img\\User.jpg"
+                const useralt = "User"
+                const body = document.getElementById('mess')
+                const user_mess = document.createElement('div')
+                user_mess.className = "user"
+                user_mess.innerHTML = `
+                    <img src=${userimg} alt=${useralt}>
+                    <p>${user_query}</p>
+                    <hr>
+                `
+                body.appendChild(user_mess)
+                try{
+                    const response = await fetch('http://localhost:8000/',{
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            query: user_query
+                        })
+                    })
+                    if(!response.ok){
+                        throw new Error('Something, go wrong!!')
+                    }
+                    const chatbot = await response.json()
+                    const bot_mess = document.createElement('div')
+                    const img = "img\\Arona-removebg-preview.png"
+                    const arona = "Arona"
+                    bot_mess.className = "bot"
+                    bot_mess.innerHTML = `
+                        <img src=${img} alt=${arona}>
+                        <p>${chatbot.traloi.response}</p>
+                        <hr>
+                    `
+                    body.appendChild(bot_mess)
+                }catch(e){
+                    throw e
+                }
+            }
+        })();
+    </script>
+    <style>
+        #main{
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .bot img{
+            width: 5%;
+            height: 5%;
+        }
+        .bot p{
+            margin-left: 2%;
+            font-family: "Lexend Deca", sans-serif;
+            font-size: 20px;
+        }
+        .user img{
+            width: 5%;
+            height: 5%;
+        }
+        .user p{
+            margin-left: 2%;
+            font-family: "Lexend Deca", sans-serif;
+            font-size: 20px;
+        }
+        #inputbox{
+            flex-shrink: 0;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            margin: 1%;
+        }
+        #mess{
+            flex: 1;
+            overflow-y: auto;
+        }
+        #input_text{
+            width: 70%;
+            color: rgb(0, 0, 0);
+            border-radius: 5px;
+            border: 5px;
+            background-color: rgb(236, 236, 236);
+            font-size: 20px;
+            padding: 1%;
+        }
+        #submit{
+            margin-left: 1%;
+            border-radius: 5px;
+            border: 5px;
+            font-size: 20px;
+            padding: 1%;
+            background-color: rgb(18, 138, 250);
+            color: white;
+        }
+        .user{
+
+        }
+    </style>
+</head>
+<body>
+    <div id="main">
+        <div id="mess">
+        <!-- chatbot -->
+            <div class="bot">
+                <img src="img\Arona-removebg-preview.png" alt="Arona">
+                <p>Hi, I'm Arona, a tutor chatbot support you at machine learning course. How can I help you?</p>
+                <hr>
+            </div>
+        <!-- user -->
+
+        </div>
+        <!-- send query -->
+        <div id="inputbox">
+            <form action="#">
+                <label for="input" value="input text"></label>
+                <input type="text" id="input_text" name="input" placeholder="Type your question" required>
+                <input type="submit" id="submit" value="Send">
+            </form>
+        </div>
+    </div>
+</body>
+</html>
