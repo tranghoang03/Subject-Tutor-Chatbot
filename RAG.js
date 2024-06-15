@@ -27,7 +27,7 @@ const vectorStore = new QdrantVectorStore({
 //PDF Reader
 async function loadDoc(){
   const reader = new SimpleDirectoryReader()
-  const document = await reader.loadData('../SS2_Project/doccument')
+  const document = await reader.loadData('./doccument')
   return document
 }
 //Text splitter
