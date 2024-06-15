@@ -1,8 +1,9 @@
 const { SimpleDirectoryReader } = require("llamaindex/readers/SimpleDirectoryReader")
 const { SentenceSplitter } = require("llamaindex")
 const { Gemini, GeminiEmbedding, Settings, serviceContextFromDefaults } = require("llamaindex")
-const { Document, VectorStoreIndex, QdrantVectorStore, ModalityType } = require("llamaindex")
+const { Document, VectorStoreIndex, QdrantVectorStore, ModalityType, CohereRerank } = require("llamaindex")
 const dotenv = require("dotenv")
+const { nodeParserFromSettingsOrContext } = require("llamaindex/Settings")
 
 dotenv.config({path: './.env'})
 
@@ -62,18 +63,27 @@ async function VectorStore(){
   return index
 }
 let index
+let retriever
+const Reranker = new CohereRerank({
+  apiKey: process.env.COHERE_API_KEY,
+  topN: 6,
+})
 VectorStore()
 .then(resp =>{ 
   index = resp
-  console.log(index)
+})
+.then(resp => {
+  retriever = index.asRetriever()
+  retriever.similarityTopK = 10
 })
 
 
+
 async function answer(user_query){
-  // const index = await VectorStore()
-  const retriever = await index.asRetriever()
-  retriever.similarityTopK = 10
-  const queryEngine = index.asQueryEngine()
+  const queryEngine = index.asQueryEngine({
+    retriever: retriever,
+    nodePostprocessors: [Reranker],
+  })
   const query = user_query
   const results = await queryEngine.query({
     query,
